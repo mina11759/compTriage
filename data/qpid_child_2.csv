@@ -1,0 +1,142 @@
+Issue Type,Issue key,Issue id,title,Assignee,Reporter,Status,Resolution,Updated,component_1,component_2,component_3,description
+Bug,QPID-1389,12407079,ConnectionTest.testResume failure on build system,rhs,ritchiem,Closed,Fixed,2017-03-14 20:02,Common,Tests,NONE,"Summary:
+
+The ConnectionTest failed again today with this issue.
+
+ConnectionTest.testResume
+org.apache.qpid.transport.SessionException: timed out waiting for sync: complete = 3, point = 8   
+at org.apache.qpid.transport.Session.sync(Session.java:482)   
+at org.apache.qpid.transport.Session.sync(Session.java:451)   
+at org.apache.qpid.transport.ConnectionTest.testResume(ConnectionTest.java:221) "
+Bug,QPID-1557,12411738,the cpp.cluster test profile fails,rhs,rhs,Closed,Fixed,2017-03-14 20:02,Common,Tests,JMS AMQP 0-x,"When the tests are run against the clustered cpp broker with 'ant -Dprofile=cpp.cluster' there are a few failures:
+  - the XA tests fail because the clustered broker doesn't support XA, these should be excluded from the profile
+  - several of the failover tests fail because they assume that no state is shared between the primary and backup node, this is not true for a clustered broker, these tests need to be adjusted to handle clustered as well as non clustered failover
+  - a few of the failover tests fail because the java client advertises a non-zero session timeout and this is hitting untested code in the broker, this is also incorrect because the java client isn't really doing a full session resume"
+Bug,QPID-1499,12409693,IOAcceptor test class has no shutdown method causing test failures on Mac OS X,rhs,ritchiem,Closed,Fixed,2008-12-06 20:10,Common,Tests,NONE,"Summary:
+
+The ConnectionTest fails on MacOS X ant test run for a number of reasons.
+
+The mina method AvailablePortFinder.getNextAvailable doesn't appear to get the next available port on MacOSX.
+
+The problem is that each new test in ConnectionTest binds a new server but does not close the old one.
+
+Under linux and windows the IOAcceptor must relinquish the socket but this doesn't occur under Mac OS X.
+
+
+Solution.:
+
+The IOAcceptor is a small server process for used in testing and example app
+
+However it doesn't have a close method, if we add one then we can add a tearDown method that will clean up the ServerSocket used in the IOAcceptor between tests.
+"
+Bug,QPID-3973,12552367,QPID Java SSLUtil does not support non-JKS key store types,rgodfrey,jsightle@redhat.com,Closed,Fixed,2017-03-14 20:12,Common,JMS AMQP 0-x,NONE,"We are required to run our system in FIPS-compliant mode, using the NSS library for Java Security. In this mode, we cannot use JKS for private key storage.
+
+Unfortunately, SSLUtil does not support configurable KeyStore types, and will throw an exception if we attempt to do this."
+Bug,QPID-3679,12534941,Documentation for JMS prefetch could use some correction and amplification,robbie,gsim,Closed,Fixed,2017-03-14 20:08,Documentation,JMS AMQP 0-x,NONE,"(1) the documentation states that maxprefetch controls the 'maximum number of pre-fetched messages per destination'. However this is not strictly correct, it is the prefetch per *consumer* (if you had multiple consumers on the same destination they would each have that amount of prefetch).
+
+(2) there is no mention of the capacity option in the address (which admittedly is only supported by the JMS client ta this point)"
+Bug,QPID-964,12394698,CombinedTest.testForwardAll fails,aidan,aidan,Closed,Fixed,2017-03-14 20:02,Tests,JMS AMQP 0-x,NONE,"Fails when run against a 0-10 broker 
+
+Didn't receive all messages... got 0 expected 1
+
+java.lang.Exception: Didn't receive all messages... got 0 expected 1
+at org.apache.qpid.test.unit.client.forwardall.Client.waitUntilComplete(Client.java:106)
+at org.apache.qpid.test.unit.client.forwardall.Client.shutdownWhenComplete(Client.java:80)
+at org.apache.qpid.test.unit.client.forwardall.CombinedTest.testForwardAll(CombinedTest.java:59)
+at org.apache.qpid.testutil.QpidTestCase.runBare(QpidTestCase.java:131)
+at org.apache.qpid.testutil.QpidTestCase.run(QpidTestCase.java:157)"
+Bug,QPID-839,12390458,DupsOkTest hangs on failure,aidan,aidan,Closed,Fixed,2017-03-14 20:02,Tests,JMS AMQP 0-x,NONE,"Exception in thread ""Dispatcher-Channel-1"" junit.framework.AssertionFailedError:
+ The queue should have 0 msgs left expected:<0> but was:<1>
+        at junit.framework.Assert.fail(Assert.java:47)
+        at junit.framework.Assert.failNotEquals(Assert.java:282)
+        at junit.framework.Assert.assertEquals(Assert.java:64)
+        at junit.framework.Assert.assertEquals(Assert.java:201)
+        at org.apache.qpid.test.client.DupsOkTest$1.onMessage(DupsOkTest.java:103)
+        at org.apache.qpid.client.BasicMessageConsumer.notifyMessage(BasicMessageConsumer.java:720)
+        at org.apache.qpid.client.BasicMessageConsumer.notifyMessage(BasicMessageConsumer.java:680)
+        at org.apache.qpid.client.AMQSession$Dispatcher.dispatchMessage(AMQSession.java:3019)
+        at org.apache.qpid.client.AMQSession$Dispatcher.run(AMQSession.java:2942)
+<hang>
+
+Super fantastico!
+
+
+"
+Bug,QPID-963,12394684,SimpleACLTest.testServerPublishInvalidQueueSucces and testServerPublishUsingTransactionSuccess fail,ritchiem,aidan,Closed,Fixed,2017-03-14 20:02,Tests,JMS AMQP 0-x,NONE,"After the merge, SimpleACLTest fails in two test cases, and takes around 2 minutes to run on windows (possibly indicative of a problem with connections being forcibly closed? See QPID-962)
+
+junit.framework.AssertionFailedError: Test publish failed:org.apache.qpid.client.JMSAMQException: Failed to commit:  [error code 403: access refused] [error code 403: access refused]
+        at junit.framework.Assert.fail(Assert.java:47)
+        at org.apache.qpid.server.security.acl.SimpleACLTest.testServerPublishUs
+ingTransactionSuccess(SimpleACLTest.java:533)
+
+testServerPublishInvalidQueueSuccess(org.apache.qpid.server.security.acl.SimpleACLTest)  Time elapsed: 60.531 sec  <<< ERROR!
+org.apache.qpid.AMQConnectionFailureException: 530 [error code -1: unknown code]
+        at org.apache.qpid.client.AMQConnection.<init>(AMQConnection.java:519)
+        at org.apache.qpid.client.AMQConnection.<init>(AMQConnection.java:336)
+        at org.apache.qpid.server.security.acl.SimpleACLTest.testServerPublishInvalidQueueSuccess(SimpleACLTest.java:541)
+"
+Bug,QPID-1179,12400368,QueueBrowser Test Failure (testMultipleGetEnum),ritchiem,ritchiem,Closed,Fixed,2017-03-14 20:02,Tests,JMS AMQP 0-x,NONE,"Summary:
+
+This test failed with the following error:
+
+TestName: testMultipleGetEnum Duration: 7.932
+
+                                expected:<42> but was:<100>
+
+First point the expected and actual are reversed!
+
+Second point why are we using 100 msgs is that really necessary.
+
+In partial answer to the second point. The failure is due to the fact that running InVM broker and client on the single core machine is just to slow.
+
+As will be shown in second JIRA the client has received more messages for the browser but the receive times out before they can be delivered.
+
+Suggest reducing the msgs count to 10. To resolve this JIRA.
+"
+Bug,QPID-2242,12442481,JMS_QPID_DESTTYPE is not set making getJMSDestination unusable.,,ritchiem,Closed,Fixed,2011-09-05 21:51,Common,JMS AMQP 0-x,NONE,"The problem is that Qpid M2.1 (and earlier) sets the JMS_QPID_DESTTYPE header property before sending. 
+If you try and do that on a message that doesn't have the property set then it will attempt to write it into the _encodedForm ByteBuffer if there is one.
+
+In the scenario where you are receiving messages and then re-sending them not creating new ones. The header has already been read so the buffer limit and position are the same which means any write to the buffer will throw a BufferOverflowException. In short the headers are Read Only.
+
+I have tested with M2.1 After the merge to trunk for M3 the setting of this property was removed. Which does mean that the JMS Destination is marked as 'unknown' rather than 'direct' which means if you attempted to do message.getJMSDestination() to send the message back in to the queue for reprocessing it would fail.
+
+Further investigations:
+Understand why this setting was dropped after the Merge from M2.x to trunk. This property is used to control the type of Destination that message.getJMSDestination() returns.
+
+Need to check M1 to see if it sets the value on sent Messages.
+
+Also need to check how the 0-10 code path defines the JMSDestination() as it too appears to never to have a value set and so will be an 'unknown' destination."
+Bug,QPID-632,12380094,ImmediateMessageTest fails occasionally because AMQNoConsumersException  was not received.,ritchiem,ritchiem,Closed,Fixed,2008-07-07 11:25,Tests,JMS AMQP 0-x,NONE,"Occassionally I've seen this error
+junit.framework.AssertionFailedError: Was expecting linked exception type org.apache.qpid.client.AMQNoConsumersException on the connection. 
+Got no exceptions on the connection.
+"
+Bug,QPID-7888,13094140,[Java Client] [Documentation] Correct typo in end to end encryption connection url examples,kwall,kwall,Closed,Fixed,2019-10-02 19:20,Documentation,JMS AMQP 0-x,NONE,"As highlighted by this thread:
+
+https://stackoverflow.com/questions/45583101/encrypted-messages-using-apache-qpid
+
+there is a typo in the connection urls used in the example."
+Bug,QPID-6768,12902319,Avoid unnecessary message payload copy during send (0-8...0-91),,kwall,Resolved,Fixed,2019-10-02 19:20,Common,JMS AMQP 0-x,NONE,"The {{org.apache.qpid.framing.ContentBody#writePayload(java.io.DataOutput)}} method (on the client's publish path when using 0-8..0-91) always copies the payload before writing to the {{DataOutput}}.  The underlying byte buffer is expected to be a heap byte buffer and so will have a backing array, so the copy can be optimised away in this case."
+Bug,QPID-3453,12519994,Test PersistentStoreTest fails on java-bdb-spawn.0-10 profile,kwall,orudyy,Closed,Fixed,2017-03-14 20:07,Tests,JMS AMQP 0-x,NONE,"The PersistentStoreTest: fails as follows:
+
+connection closed
+
+org.apache.qpid.transport.ConnectionException: connection closed
+at org.apache.qpid.transport.Connection.send(Connection.java:358)
+at org.apache.qpid.transport.Session.send(Session.java:498)
+at org.apache.qpid.transport.Session.invoke(Session.java:707)
+at org.apache.qpid.transport.Session.invoke(Session.java:523)
+at org.apache.qpid.transport.SessionInvoker.sessionRequestTimeout(SessionInvoker.java:48)
+at org.apache.qpid.transport.Session.close(Session.java:917)
+at org.apache.qpid.client.AMQSession_0_10.sendClose(AMQSession_0_10.java:388)
+at org.apache.qpid.client.AMQSession.close(AMQSession.java:729)
+at org.apache.qpid.client.AMQSession.close(AMQSession.java:695)
+at org.apache.qpid.client.AMQConnection.closeAllSessions(AMQConnection.java:1147)
+at org.apache.qpid.client.AMQConnection.doClose(AMQConnection.java:1041)
+at org.apache.qpid.client.AMQConnection.doClose(AMQConnection.java:1030)
+
+On stopping broker, the underlining transport connection is closed and transport session is put into DETACHED state.
+Corresponding AMQSession remains in an open state.
+On invoking of AMQConnection#close() method all open AMQSessions are put into closed state and for each AMQSession method sendClose is invoked.
+AMQSession_0_10#sendClose(long) calls  close() method for underlying DETACHED transport session which fails because transport connection is already closed.
+"
+Bug,QPID-6720,12860610,Replace calls to o.a.q.t.Logger with direct calls to SLF4J,lorenz.quack,kwall,Closed,Fixed,2019-10-02 19:21,Common,JMS AMQP 0-x,NONE,"Some client/common classes log via  o.a.q.t.Logger whilst others use SLF4J directly.  Their argument order and message formatting conventions diff, causing unnecessary complexity."
